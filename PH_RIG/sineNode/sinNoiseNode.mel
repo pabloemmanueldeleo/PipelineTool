@@ -1,0 +1,75 @@
+global proc sineGUI() {
+	
+	if(`window -q -ex  mfSinNoiseNode`) deleteUI mfSinNoiseNode;  // check if window is already open & delete it 
+	window -t "Sine Noise Node Helper" -sizeable 1 -tlb 0 mfSinNoiseNode; 
+
+	columnLayout -cat "left" 45  -w 300 -h 300   coll ;
+	
+	separator -w 300 -h 10 -hr 1 -st "single";
+	
+	text -w 300 -h 20 -vis 1 
+	-label "Sine Noise Node Helper"
+	-align "center" -font "boldLabelFont" ;
+	
+	text -w 300 -h 60 -vis 1 
+	-label "1. Select an object. \n 2. Set the relevant checkboxes. \n 3. Click 'Create'!"
+	-align "center" -font "fixedWidthFont" ;
+	
+	separator -w 300 -h 10 -hr 1 -st "single";
+	
+	checkBoxGrp -ncb 3 -labelArray3 "Translation" "Rotation" "Scale" -cw3 125 125 125 trsCheck;
+	
+	separator -w 300 -h 10 -hr 1 -st "single";
+	
+	separator -w 300 -h 5-hr 1 -st "none";
+	
+	button    -w 300 -h 30 -label "Undo" -command undo;
+	button    -w 300 -h 30 -label "Create" -command createSineNode;
+	
+	separator -w 300 -h 5 -hr 1 -st "none";
+	
+	
+	showWindow mfSinNoiseNode;
+	window -e -w 400-h 260 mfSinNoiseNode;
+	
+}
+
+sineGUI;
+
+global proc createSineNode() {
+	
+	string $obj[] = `ls -sl`;
+	
+	if (size($obj) >0) {
+	string $nodeName;
+	string $nodeName = $obj[0];
+	
+	int		$trans			= `checkBoxGrp -q -v1 trsCheck`;
+	int		$rot			= `checkBoxGrp -q -v2 trsCheck`;
+	int		$scale			= `checkBoxGrp -q -v3 trsCheck`;
+	
+	if( $trans )$nodeName += "Trans";
+			
+	if( $rot ) $nodeName += "Rot";
+	
+	if( $scale ) $nodeName += "Scale";
+	
+	$nodeName += "Sine";
+	string $newNode = `createNode sineNode -n $nodeName`;
+	
+	if( $trans ) 
+	connectAttr -force ($newNode +".output") ($obj[0] +".translate");
+	
+	if( $rot ) 
+	connectAttr -force ($newNode +".output") ($obj[0] +".rotate");
+	
+	if( $scale ) 
+	connectAttr -force ($newNode +".output") ($obj[0] +".scale");
+	
+	
+	connectAttr -f time1.outTime ($newNode +".input");
+	}
+	else {
+	error "Please select a translate.";
+	}
+}

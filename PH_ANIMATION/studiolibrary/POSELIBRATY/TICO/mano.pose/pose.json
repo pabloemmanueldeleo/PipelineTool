@@ -1,0 +1,152 @@
+{
+  "metadata": {
+    "description": "", 
+    "user": "mmaus", 
+    "mayaSceneFile": "D:/PH_SCRIPTS/SCENES_RIG/poses/03_TICO.ma", 
+    "version": "1.0.0", 
+    "mayaVersion": "2015"
+  }
+,
+  "objects": {
+    "tico:Ctrl_LeftHandThumbEffector": {
+      "attrs": {
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": 49.293601989746094
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 90.78194427490234
+        }, 
+        "translateZ": {
+          "type": "doubleLinear", 
+          "value": 2.1624820232391357
+        }, 
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": 4.9091980588357105e-06
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": -8.671137780520685e-06
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 0.0
+        }
+      }
+    }, 
+    "tico:Ctrl_LeftHandRingEffector": {
+      "attrs": {
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": 53.981788635253906
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 91.56754302978516
+        }, 
+        "translateZ": {
+          "type": "doubleLinear", 
+          "value": -6.709668159484863
+        }, 
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": 5.549527886413337e-06
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": 0.0
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 3.201650766332475e-06
+        }
+      }
+    }, 
+    "tico:Ctrl_LeftHandMiddleEffector": {
+      "attrs": {
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": 54.90546798706055
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 91.84882354736328
+        }, 
+        "translateZ": {
+          "type": "doubleLinear", 
+          "value": -4.223515510559082
+        }, 
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": 5.3160757834604435e-06
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": 5.350155859427739e-06
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 2.4545996400843316e-06
+        }
+      }
+    }, 
+    "tico:Ctrl_LeftHandIndexEffector": {
+      "attrs": {
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": 54.52225875854492
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 92.06916046142578
+        }, 
+        "translateZ": {
+          "type": "doubleLinear", 
+          "value": -1.6720216274261475
+        }, 
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": 5.249818061225175e-06
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": 1.1299600123008409e-29
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 2.190322313602912e-06
+        }
+      }
+    }, 
+    "tico:Ctrl_LeftHandPinkyEffector": {
+      "attrs": {
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": 52.320762634277344
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 91.3681869506836
+        }, 
+        "translateZ": {
+          "type": "doubleLinear", 
+          "value": -7.977149486541748
+        }, 
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": 5.370126282383845e-06
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": -3.4164852761797283e-06
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 2.7628830193607286e-06
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+    "_TICO_v020": {
+        "TICO": {
+            "HEAD": [
+                "_TICO_v020:tico:Ctrl_HeadEffector"
+            ], 
+            "L_HAND": [
+                "_TICO_v020:tico:Ctrl_LeftWristEffector"
+            ], 
+            "L_HAND_FINGERS": [
+                "_TICO_v020:tico:Ctrl_LeftHandIndexEffector", 
+                "_TICO_v020:tico:Ctrl_LeftHandMiddleEffector", 
+                "_TICO_v020:tico:Ctrl_LeftHandPinkyEffector", 
+                "_TICO_v020:tico:Ctrl_LeftHandRingEffector", 
+                "_TICO_v020:tico:Ctrl_LeftHandThumbEffector"
+            ]
+        }
+    }
+}

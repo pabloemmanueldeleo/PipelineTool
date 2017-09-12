@@ -1,0 +1,106 @@
+/*
+Lockea y deslockea los parametros de estereoscopia. Contempla los viejos y los nuevos.
+*/
+string $objetosseleccionados[]=`ls("C_*__CNT")`;
+string $lista[];clear $lista;
+string $checkTipoyAtt[]; clear $checkTipoyAtt;
+int $indexTipoAtt = 0;
+int $i=0;
+for ($indexTipoAtt=0; $indexTipoAtt < size ($objetosseleccionados);++$indexTipoAtt ) {
+    $lista = `listRelatives -s  $objetosseleccionados[$indexTipoAtt]`;
+        print ($lista[0] + "\n");
+        if  ( (`objectType  $lista[0]`) != "nurbsCurve"){
+            $checkTipoyAtt[size ($checkTipoyAtt)] = $objetosseleccionados[$indexTipoAtt];        
+        }
+}
+
+string $objetos[]; 
+$objetos = `ls("C_*__CNT")`;
+if (  size($objetosseleccionados) != 0  ){
+    if (  size($checkTipoyAtt) == 0 ){
+        int $estaLockTx = (! `getAttr -lock ($objetos[0]+".INTERAXIAL") `);
+        int $estado ;
+        
+        for ($objeto in $objetos){
+            setAttr -lock $estaLockTx ($objeto+".INTERAXIAL") ;
+            setAttr -lock $estaLockTx ($objeto+".ZEROP") ;
+            setAttr -lock $estaLockTx ($objeto+".CONVERGENCE") ;
+            setAttr -lock $estaLockTx ($objeto+".FocalLenght") ;
+            setAttr -lock $estaLockTx ($objeto+".NearClip") ;
+            setAttr -lock $estaLockTx ($objeto+".FarClip") ;
+        }
+        if ( `getAttr -lock  ($objeto+".INTERAXIAL")`  == 1) {headsUpMessage "ESTEREOSCOPIA LOCKEADA";} 
+        if ( `getAttr -lock  ($objeto+".INTERAXIAL")`  == 0) {headsUpMessage "ESTEREOSCOPIA DESLOCKEADA";}     
+    }else {
+            headsUpMessage ("HAY COSAS NOMBRADAS COMO SI FUERAN CONTROLES DE RIG...NOMBRALAS BIEN! TE LAS SELECCIONE...");
+            select -cl; 
+            for ($i=0;$i<size($checkTipoyAtt); ++$i){
+                select -add $checkTipoyAtt[$i]; 
+          }//else      
+    }//if      
+}//if        
+
+    
+    
+//SECCION RIG VIEJOS -------------------------------------------------------------------------
+
+
+
+string $rigsViejos[];clear $rigsViejos;
+$rigsViejos=`ls("SCAM_*_Control")`;
+//si hay viejos nomas
+if (  size($objetosseleccionados) == 0  ){
+    if (  size($checkTipoyAtt) == 0  ) {
+            if (  size($rigsViejos) != 0  ) {
+
+            
+            clear $lista;
+            $indexTipoAtt = 0;
+            $i=0;
+             
+            for ($indexTipoAtt=0; $indexTipoAtt < size ($rigsViejos);++$indexTipoAtt ) {
+                $lista = `listRelatives -s  $rigsViejos[$indexTipoAtt]`;
+                    if  (`objectType  $lista[0]` != "nurbsCurve"){
+                        $checkTipoyAtt[size ($checkTipoyAtt)] = $rigsViejos[$indexTipoAtt];        
+                    }
+            }
+            
+                int $estaLockTx = (! `getAttr -lock ($rigsViejos[0]+".INTERAXIAL") `);
+                int $estado ;
+                
+                for ($objeto in $rigsViejos){
+                    setAttr -lock $estaLockTx ($objeto+".INTERAXIAL") ;
+                    setAttr -lock $estaLockTx ($objeto+".ZEROP") ;
+                    setAttr -lock $estaLockTx ($objeto+".CONVERGENCE") ;
+                    setAttr -lock $estaLockTx ($objeto+".FocalLenght") ;
+                    setAttr -lock $estaLockTx ($objeto+".NearClip") ;
+                    setAttr -lock $estaLockTx ($objeto+".FarClip") ;
+
+                }
+                if ( `getAttr -lock  ($objeto+".INTERAXIAL")`  == 1) {headsUpMessage "ESTEREOSCOPIA LOCKEADA";} 
+                if ( `getAttr -lock  ($objeto+".INTERAXIAL")`  == 0) {headsUpMessage "ESTEREOSCOPIA DESLOCKEADA";}     
+         }//if              
+    }//if                
+}//if
+
+
+
+//si hay viejos y nuevos
+if (  size($objetosseleccionados) != 0  ){
+    if (  size($checkTipoyAtt) == 0  ) {
+        $rigsViejos=`ls("SCAM_*_Control")`; 
+        if (  size($rigsViejos) != 0  ) {headsUpMessage "CAMARAS STEREO VIEJOS Y NUEVOS. ELEGI UNO";}
+    }//if                
+}//if
+
+
+//CONCLUYE AL FIN
+
+if (  size($objetosseleccionados) == 0 ) {
+    if (  size($rigsViejos) == 0 ) {
+        headsUpMessage ("EM... NO HAY RIGS STEREO...");
+    }    
+}
+
+clear $objetosseleccionados;
+clear $rigsViejos;

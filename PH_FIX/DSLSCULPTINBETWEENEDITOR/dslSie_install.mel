@@ -1,0 +1,29 @@
+// Install icon for the dslSculpt Inbetween Editor
+// Copyright (C) Daniel S. Lima
+// www.danielslima.com
+
+
+global proc dslSie_install() 
+{
+    global string $gShelfTopLevel;
+    string $currentSelf = ( $gShelfTopLevel + "|" + 
+                            `tabLayout -q -selectTab $gShelfTopLevel` );
+    string $icon;
+    $icon = "cie-animtools.xpm";
+
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -label "SculptInbetweenEditor"
+        -image1 ("dslSieIcon.xpm")
+        -style "iconOnly" 
+        -parent $currentSelf
+        -stp "python"
+        -command ( "import dslSculptInbetweenEditor as dslSie\n\create = dslSie.SculptInbetweenEditor()\n\create.ui()");
+}
+
+dslSie_install();

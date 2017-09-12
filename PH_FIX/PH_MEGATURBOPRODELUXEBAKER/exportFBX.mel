@@ -1,0 +1,6 @@
+global proc fbxExport(string $ruta) 
+
+{
+	FBXExport -f $ruta -s;
+
+}

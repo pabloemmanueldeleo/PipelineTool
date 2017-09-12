@@ -1,0 +1,18 @@
+// PoseMAN pose file
+
+ctrl:C_E_P_TRF
+C_E_P_TRF * visibility * 1 * 1
+C_E_P_TRF * translateX * 0 * 1
+C_E_P_TRF * translateY * 0 * 1
+C_E_P_TRF * translateZ * 0 * 1
+C_E_P_TRF * rotateX * 0 * 1
+C_E_P_TRF * rotateY * 0 * 1
+C_E_P_TRF * rotateZ * 0 * 1
+C_E_P_TRF * INTERAXIAL * 4 * 1
+C_E_P_TRF * ZEROP * 200 * 1
+C_E_P_TRF * CONVERGENCE * 0 * 1
+C_E_P_TRF * FocalLenght * 35 * 1
+C_E_P_TRF * NearClip * 1 * 1
+C_E_P_TRF * FarClip * 20000 * 1
+
+// End of PoseMAN file

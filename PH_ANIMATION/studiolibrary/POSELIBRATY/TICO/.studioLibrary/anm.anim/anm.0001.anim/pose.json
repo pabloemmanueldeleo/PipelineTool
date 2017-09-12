@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "mayaSceneFile": "D:/PH_SCRIPTS/SCENES_RIG/poses/03_TICO.ma", 
+    "angularUnit": "deg", 
+    "description": "", 
+    "endFrame": 24, 
+    "linearUnit": "cm", 
+    "version": "1.0.0", 
+    "user": "mmaus", 
+    "startFrame": 1, 
+    "timeUnit": "film", 
+    "mayaVersion": "2015"
+  }
+,
+  "objects": {
+    "tico:Ctrl_HipsEffector": {
+      "attrs": {
+        "translateX": {
+          "curve": "CURVE1", 
+          "type": "doubleLinear", 
+          "value": 77.1359634399414
+        }, 
+        "translateY": {
+          "curve": "CURVE2", 
+          "type": "doubleLinear", 
+          "value": 66.31472778320312
+        }, 
+        "translateZ": {
+          "curve": "CURVE3", 
+          "type": "doubleLinear", 
+          "value": 32.80982208251953
+        }, 
+        "rotateX": {
+          "curve": "CURVE4", 
+          "type": "doubleAngle", 
+          "value": 0.0
+        }, 
+        "rotateY": {
+          "curve": "CURVE5", 
+          "type": "doubleAngle", 
+          "value": -0.0
+        }, 
+        "rotateZ": {
+          "curve": "CURVE6", 
+          "type": "doubleAngle", 
+          "value": 0.0
+        }
+      }
+    }
+  }
+}

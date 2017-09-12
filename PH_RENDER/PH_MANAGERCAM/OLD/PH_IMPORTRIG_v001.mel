@@ -1,0 +1,149 @@
+/* 
+************************************************************************************
+
+AutoRigStereo: 
+1 - Asegurarse que las cámaras no tengan atributos lockeados.
+2 - Asegurarse que las cámaras se llaman correctamente. (Ej: UDxxx_Exxx_Pxx_CAM)
+3 - Seleccionar cámaras a reemplazar.  
+4 - Ejecutar script.
+
+************************************************************************************
+
+Autor: Gabo Salinas.
+
+*/
+
+string $objetosseleccionados [] = `ls -sl`;
+int $indexSel = 0 ;
+ global proc float [] floatArrayRemoveDuplicates(float $list[])
+            {
+                float $item, $results[];
+                int $index = 0, $found;
+            
+                for ($item in $list)
+                {
+                    $found = 0;
+                    for ($result in $results)
+                        if ($result == $item)
+                            $found = 1;
+                    if (!$found)
+                        $results[$index++] = $item;
+                }
+                return $results;
+            }
+            
+if (size ($objetosseleccionados) != 0 ){
+    
+    
+
+    for (  $indexSel = 0 ; $indexSel < size($objetosseleccionados)  ; ++ $indexSel ) 
+    
+        {
+          
+            string $list[] = `listRelatives -s  $objetosseleccionados[$indexSel]`;
+            //print (`objectType  $list[0]`); 
+               
+            if (`objectType  $list[0]` =="camera"){
+                    if ( $objetosseleccionados[$indexSel] != "front")
+                    {  
+                        if ( $objetosseleccionados[$indexSel] != "top")
+                        {           
+                            if ( $objetosseleccionados[$indexSel] != "side")
+                            { 
+                                if ( $objetosseleccionados[$indexSel] != "persp")
+                                {         
+                             
+                                    file -import -type "mayaAscii"  -ignoreVersion -ra true -mergeNamespacesOnClash true -namespace ":" -options "v=0;"  -pr "M:/PH_SCRIPTS/SCENES_RIG/IMPORTRIGS/rig_esterocam_final.ma";
+                        
+                                    float $listaKeyframes[] = floatArrayRemoveDuplicates(`keyframe -q ($objetosseleccionados[$indexSel])`);
+                                    int $cantidadKeyframes = size($listaKeyframes);
+                                
+                           
+                                
+                                    for($i=0;$i<$cantidadKeyframes;++$i) 
+                                    {
+                                       	currentTime $listaKeyframes[$i];
+                                        
+                                        //Q
+                                        float $PosCamVieja[] = `xform -q -ws -t $objetosseleccionados[$indexSel]`;
+                                        float $RotCamVieja[] = `xform -q -ws -ro $objetosseleccionados[$indexSel]`;
+
+                                        float $focalLength = `camera -q -fl $objetosseleccionados[$indexSel]`;		
+                                        
+                                        
+                                        //S
+                                        move -absolute $PosCamVieja[0] $PosCamVieja[1] $PosCamVieja[2] C_E999_P00__CNTSH;
+                                        rotate -a $RotCamVieja[0] $RotCamVieja[1] $RotCamVieja[2] C_E999_P00__CNTSH;
+                                        
+                                
+                                    	setAttr "C_E999_P00__CNT.FocalLenght" $focalLength;
+                            
+                                        
+                                        setKeyframe "C_E999_P00__CNT.tx";
+                                        setKeyframe "C_E999_P00__CNT.ty";
+                                        setKeyframe "C_E999_P00__CNT.tz";
+                                        setKeyframe "C_E999_P00__CNT.rx";
+                                        setKeyframe "C_E999_P00__CNT.ry";
+                                        setKeyframe "C_E999_P00__CNT.rz";
+                                        
+                                        
+                                        //setAttr ($objetosseleccionados[$indexSel]+".overrideEnabled") 1;
+                                        //setAttr ($objetosseleccionados[$indexSel]+".overrideColor") 6;
+                            
+                                    	setKeyframe "C_E999_P00__CNT.FocalLenght";
+                            
+                                        
+                                        filterCurve  C_E999_P00__CNT_FocalLenght   C_E999_P00__CNT_translateX C_E999_P00__CNT_translateY C_E999_P00__CNT_translateZ C_E999_P00__CNT_rotateX C_E999_P00__CNT_rotateY C_E999_P00__CNT_rotateZ ;
+                                    
+                                        
+                                    }
+                                    
+                                        //renombrado
+                                        string $EXXX_PXX = `substring $objetosseleccionados[$indexSel]  6 ( size ( $objetosseleccionados[$indexSel]) - 4 ) `;
+                                        
+                                        //hide $objetosseleccionados[$indexSel];
+                                        rename C_E999_P00__GRP ("C_" + $EXXX_PXX +"__GRP"); 
+                                        
+                                        rename C_E999_P00__CNTSH ("C_" + $EXXX_PXX +"__CNTSH"); 
+                                        rename C_E999_P00__TRF ("C_" + $EXXX_PXX +"__TRF"); 
+                                                                                
+                                        rename L_E999_P00__CAM ("L_" + $EXXX_PXX + "__CAM");
+                                        rename L_E999_P00__HCNS ("L_" + $EXXX_PXX +"__HCNS"); 
+                                        
+                                        rename R_E999_P00__CAM ("R_" + $EXXX_PXX + "__CAM");
+                                        rename R_E999_P00__HCNS ("R_" + $EXXX_PXX +"__HCNS"); 
+                                        
+                                        rename C_E999_P00__CNT ("C_" + $EXXX_PXX + "__CNT");
+                                        
+                                        rename C_E999_P00_SCAM ("C_"+$EXXX_PXX + "_SCAM");
+                                        rename L_E999_P00_SCAM ("L_" + $EXXX_PXX + "__SCAM");
+                                        rename R_E999_P00_SCAM ("R_" + $EXXX_PXX + "__SCAM");
+                                        rename C_E999_P00__HCNS ("C_"+$EXXX_PXX + "__HCNS");
+                                        
+                                        
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.tx");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.ty");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.tz");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.rx");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.ry");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.rz");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.v");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.INTERAXIAL");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.ZEROP");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.CONVERGENCE");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.FocalLenght");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.NearClip");
+                                        setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.FarClip");
+                                        
+                                        
+                                      }}}}  
+        }else{
+            warning ($objetosseleccionados[$indexSel] + " NO ES UNA CAMARA");
+        }
+    }
+   
+}else{
+    warning "NO HAY NADA SELECCIONADO";
+}
+
+

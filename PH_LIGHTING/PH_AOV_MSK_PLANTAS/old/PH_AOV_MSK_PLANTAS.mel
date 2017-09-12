@@ -1,0 +1,103 @@
+/*MEL SCRIPT AOV FOR STANDIN*/
+createNode "aiUtility" -n ("ID__SHD");
+setAttr ("ID__SHD.shadeMode") 2;
+setAttr "ID__SHD.colorMode" 21;
+
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+createNode "aiAOV" -n ("aiAOV_MSK_ECO");
+connectAttr -f ("aiAOV_MSK_ECO"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_MSK_ECO"+".type") 5;
+setAttr -type "string" aiAOV_MSK_ECO.name "MSK_ECO";
+
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_MSK_ECO"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_MSK_ECO"+".outputs[0].filter");
+
+select -cl;
+
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+createNode "aiAOV" -n ("aiAOV_MSK_BOULDER");
+connectAttr -f ("aiAOV_MSK_BOULDER"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_MSK_BOULDER"+".type") 5;
+setAttr -type "string" aiAOV_MSK_BOULDER.name "MSK_BOULDER";
+
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_MSK_BOULDER"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_MSK_BOULDER"+".outputs[0].filter");
+
+select -cl;
+
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+createNode "aiAOV" -n ("aiAOV_MSK_BUSH");
+connectAttr -f ("aiAOV_MSK_BUSH"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_MSK_BUSH"+".type") 5;
+setAttr -type "string" aiAOV_MSK_BUSH.name "MSK_BUSH";
+
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_MSK_BUSH"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_MSK_BUSH"+".outputs[0].filter");
+
+select -cl;
+
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+createNode "aiAOV" -n ("aiAOV_MSK_GRASS");
+connectAttr -f ("aiAOV_MSK_GRASS"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_MSK_GRASS"+".type") 5;
+setAttr -type "string" aiAOV_MSK_GRASS.name "MSK_GRASS";
+
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_MSK_GRASS"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_MSK_GRASS"+".outputs[0].filter");
+
+select -cl;
+
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+createNode "aiAOV" -n ("aiAOV_MSK_LEAVES");
+connectAttr -f ("aiAOV_MSK_LEAVES"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_MSK_LEAVES"+".type") 5;
+setAttr -type "string" aiAOV_MSK_LEAVES.name "MSK_LEAVES";
+
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_MSK_LEAVES"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_MSK_LEAVES"+".outputs[0].filter");
+
+select -cl;
+
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+createNode "aiAOV" -n ("aiAOV_MSK_PLANTS");
+connectAttr -f ("aiAOV_MSK_PLANTS"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_MSK_PLANTS"+".type") 5;
+setAttr -type "string" aiAOV_MSK_PLANTS.name "MSK_PLANTS";
+
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_MSK_PLANTS"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_MSK_PLANTS"+".outputs[0].filter");
+
+select -cl;
+
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+createNode "aiAOV" -n ("aiAOV_MSK_ROCKS");
+connectAttr -f ("aiAOV_MSK_ROCKS"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_MSK_ROCKS"+".type") 5;
+setAttr -type "string" aiAOV_MSK_ROCKS.name "MSK_ROCKS";
+
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_MSK_ROCKS"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_MSK_ROCKS"+".outputs[0].filter");
+
+select -cl;
+
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+createNode "aiAOV" -n ("aiAOV_MSK_STICKS");
+connectAttr -f ("aiAOV_MSK_STICKS"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_MSK_STICKS"+".type") 5;
+setAttr -type "string" aiAOV_MSK_STICKS.name "MSK_STICKS";
+
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_MSK_STICKS"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_MSK_STICKS"+".outputs[0].filter");
+
+select -cl;
+
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+createNode "aiAOV" -n ("aiAOV_MSK_TREES");
+connectAttr -f ("aiAOV_MSK_TREES"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_MSK_TREES"+".type") 5;
+setAttr -type "string" aiAOV_MSK_TREES.name "MSK_TREES";
+
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_MSK_TREES"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_MSK_TREES"+".outputs[0].filter");
+
+select -cl;

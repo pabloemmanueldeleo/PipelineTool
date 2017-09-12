@@ -1,0 +1,97 @@
+/* 
+************************************************************************************
+AutoRigStereo: 
+1 - Asegurarse que las cámaras no tengan atributos lockeados.
+2 - Asegurarse que las cámaras se llaman correctamente. (Ej: UDxxx_Exxx_Pxx_CAM)
+3 - Seleccionar cámaras a reemplazar.  
+4 - Ejecutar script.
+************************************************************************************
+Autor: Gabo Salinas.
+*/
+
+string $objetosseleccionados [] = `ls -sl`;
+int $indexSel = 0 ;
+
+global proc float [] floatArrayRemoveDuplicates(float $list[]){
+    float $item, $results[];
+    int $index = 0, $found;
+    for ($item in $list){
+        $found = 0;
+        for ($result in $results)
+        if ($result == $item)
+        $found = 1;
+        if (!$found)
+        $results[$index++] = $item;
+    }
+    return $results;
+}
+            
+if (size ($objetosseleccionados) != 0 ){
+    for (  $indexSel = 0 ; $indexSel < size($objetosseleccionados)  ; ++ $indexSel ){
+            string $list[] = `listRelatives -s  $objetosseleccionados[$indexSel]`;
+            if (`objectType  $list[0]` =="camera"){
+                    if ( $objetosseleccionados[$indexSel] != "front"){  
+                        if ( $objetosseleccionados[$indexSel] != "top"){           
+                            if ( $objetosseleccionados[$indexSel] != "side"){ 
+                                if ( $objetosseleccionados[$indexSel] != "persp"){         
+                                    file -import -type "mayaAscii"  -ignoreVersion -ra true -mergeNamespacesOnClash true -namespace ":" -options "v=0;"  -pr "M:/PH_SCRIPTS/SCENES_RIG/IMPORTRIGS/rig_esterocam_final.ma";
+                                    
+                                    connectAttr -f ($objetosseleccionados[$indexSel]+"_translateX.output") ("C_E999_P00__CNT.translateX"); //rename "C_E999_P00__CNT_translateX1" "RIG_translateX";
+                                    connectAttr -f ($objetosseleccionados[$indexSel]+"_translateY.output") ("C_E999_P00__CNT.translateY"); //rename "C_E999_P00__CNT_translateY1" "RIG_translateY";
+                                    connectAttr -f ($objetosseleccionados[$indexSel]+"_translateZ.output") ("C_E999_P00__CNT.translateZ"); //rename "C_E999_P00__CNT_translateZ1" "RIG_translateZ";
+                                    
+                                    connectAttr -f ($objetosseleccionados[$indexSel]+"_rotateX.output") ("C_E999_P00__CNT.rotateX");  //rename "C_E999_P00__CNT_rotateX1" "RIG_rotateX";
+                                    connectAttr -f ($objetosseleccionados[$indexSel]+"_rotateY.output") ("C_E999_P00__CNT.rotateY");  //rename "C_E999_P00__CNT_rotateY1" "RIG_rotateY";
+                                    connectAttr -f ($objetosseleccionados[$indexSel]+"_rotateZ.output") ("C_E999_P00__CNT.rotateZ");  //rename "C_E999_P00__CNT_rotateZ1" "RIG_rotateZ";
+                                    
+                                    connectAttr -f ($objetosseleccionados[$indexSel]+"_scaleX.output") ("C_E999_P00__CNT.scaleX");  
+                                    connectAttr -f ($objetosseleccionados[$indexSel]+"_scaleY.output") ("C_E999_P00__CNT.scaleY");  
+                                    connectAttr -f ($objetosseleccionados[$indexSel]+"_scaleZ.output") ("C_E999_P00__CNT.scaleZ");
+
+                                    if (`exists ($objetosseleccionados[$indexSel]+"_focalLength.output")` ) {
+                                        connectAttr -f ($objetosseleccionados[$indexSel]+"_focalLength.output") ("C_E999_P00__CNT.focalLength");
+                                    }else {print "no existe";}// 
+                                    
+                                    //renombrado
+                                    string $EXXX_PXX = `substring $objetosseleccionados[$indexSel]  6 ( size ( $objetosseleccionados[$indexSel]) - 4 ) `;
+                                    
+                                    //hide $objetosseleccionados[$indexSel];
+                                    rename C_E999_P00__GRP ("C_" + $EXXX_PXX +"__GRP"); 
+                                    
+                                    rename C_E999_P00__CNTSH ("C_" + $EXXX_PXX +"__CNTSH"); 
+                                    rename C_E999_P00__TRF ("C_" + $EXXX_PXX +"__TRF"); 
+                                                                            
+                                    rename L_E999_P00__CAM ("L_" + $EXXX_PXX + "__CAM");
+                                    rename L_E999_P00__HCNS ("L_" + $EXXX_PXX +"__HCNS"); 
+                                    
+                                    rename R_E999_P00__CAM ("R_" + $EXXX_PXX + "__CAM");
+                                    rename R_E999_P00__HCNS ("R_" + $EXXX_PXX +"__HCNS"); 
+                                    
+                                    rename C_E999_P00__CNT ("C_" + $EXXX_PXX + "__CNT");
+                                    
+                                    rename C_E999_P00_SCAM ("C_"+$EXXX_PXX + "_SCAM");
+                                    rename L_E999_P00_SCAM ("L_" + $EXXX_PXX + "__SCAM");
+                                    rename R_E999_P00_SCAM ("R_" + $EXXX_PXX + "__SCAM");
+                                    rename C_E999_P00__HCNS ("C_"+$EXXX_PXX + "__HCNS");
+                                    
+                                    
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.tx");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.ty");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.tz");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.rx");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.ry");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.rz");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.v");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.INTERAXIAL");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.ZEROP");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.CONVERGENCE");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.FocalLenght");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.NearClip");
+                                    setAttr -lock true ("C_"+$EXXX_PXX+"__CNT.FarClip");
+                                    }
+                                  }
+                              }
+                          }  
+        }else{warning ($objetosseleccionados[$indexSel] + " NO ES UNA CAMARA");}
+    }
+}else{warning "NO HAY NADA SELECCIONADO";}

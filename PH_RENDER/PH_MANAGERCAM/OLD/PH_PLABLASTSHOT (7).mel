@@ -1,0 +1,137 @@
+//15-09-2015
+
+python "import socket";
+global proc playblasteaGUI (){
+    global string $nombrePB;
+    $nombrePB = "";
+    int $animIN = `playbackOptions -q -ast`;
+    int $animOUT = `playbackOptions -q -aet`;
+    global string $nameescena;
+    $nameescena = `file -q -sn -shn`;
+    $nameescena =  `substring $nameescena 1 (size($nameescena)-3)`;
+    global string $winPlay;
+    if ( `window -exists $winPlay` ) { deleteUI $winPlay;}
+    string $winPlay = `window  -tlc 970 55 -s 0  -t "PH_PLAYBLAST v2.0" ventana_001` ;
+    print (" PLAYBLAST v1.7");
+    string $Clayout1 = `columnLayout  -w 333 -p $winPlay `;
+    string $Rlayout2 = `rowLayout -p $Clayout1 -numberOfColumns 10`;
+    radioButtonGrp -columnAlign 1 "left" -columnAlign 2 "left" -numberOfRadioButtons 2 -cw 1 60 -vertical -label "In/Out de " -select 2 -labelArray2 "Secuencia" "Timeline" botonRadio1;
+    checkBox -label "Wireframe" checkWire1;
+    global string $inFrame="";    $inFrame= `intFieldGrp  -cw 1 33 -l "IN  =  "  -v1 $animIN inFrame`;
+    global string $outFrame="";    $outFrame= `intFieldGrp  -cw 1 44 -l "OUT  =  " -v1 $animOUT outFrame`;
+    text -l "Nombre: " -w 50;
+    $nombrePB = `textField -w 150 -text ($nameescena +"_") `;
+    button   -p $Rlayout2 -l "PLAYBLAST !" -w 100 -backgroundColor (rand (1)) (rand (1)) (rand (1)) -enableBackground 0 -command "tirarPlayblast()" boton_001;
+    button  -p $Rlayout2 -l "Abrir Movies" -w 100 -command  "abrirCarpetas()";
+    string $Rlayout3 = `rowLayout -cw1 700 -p $Clayout1 -numberOfColumns 1`;
+    text -w 800 -align "center" -label "Doble click sobre un shot actualiza IN/OUT.    Control+ClickDer en la ventana de CameraSequencer asigna IN/OUT de secuencia completa.";
+    int $anchoVentanaPlayblast = `window -q -w $winPlay`;
+    int $altoVentanaPlayblast  = `window -q -h $winPlay`;
+    window -e -width $anchoVentanaPlayblast $winPlay;
+    window -e -height 70 $winPlay;
+    showWindow $winPlay;
+}
+
+global proc tirarPlayblast() {
+    global string $nombrePB;
+    global string $nameescena;
+    global int $seleccionRadio1;
+    global int $checkWire;
+    button -e -bgc (rand (1)) (rand (1)) (rand (1)) boton_001;
+    int $inF = (`intFieldGrp -q -v1 inFrame`);
+    int $outF = (`intFieldGrp -q -v1 outFrame`);
+    $checkWire = `checkBox -q -value checkWire1`; print (`checkBox -q -value checkWire1`+"\n");
+    if ($checkWire==1){
+		string $panel = `getPanel -wf`;
+		if ( `modelEditor -ex $panel` ){print ("\n\n\nENTRA\n\n\n"); modelEditor -e -wos 1 $panel;}
+        print ("\n\n\nESTADO 1: " + $checkWire + "\n\n\n");
+    }else{
+		string $panel = `getPanel -wf`;
+		if ( `modelEditor -ex $panel` ){modelEditor -e -wos 0 $panel;}
+    	print ("ESTADO 0: " + $checkWire + "\n");
+    }
+
+    if ( $inF < $outF ) {
+    	select -cl;
+        $QnombrePB = `textField -q -text $nombrePB `;
+        // IN OUT de secuencia o de timeline??
+        string $ruta = "";
+        $seleccionRadio1 = `radioButtonGrp -q -sl botonRadio1`;
+        if ($seleccionRadio1 == 2){ $seleccionRadio1 = 0;}
+        // modifico la ruta dependiendo de si existe o no la ruta para poder meter el string en el flag
+        if ( `file -q -exists ("D:/")` ) {print "Prepara ruta en D";$ruta = "D:/";}
+            else {print "\nPrepara ruta en C";$ruta = "C:/";}
+        FechaDeEscena (true);
+        // playblast
+        playblast -fmt "qt" -startTime $inF  -endTime $outF -sequenceTime $seleccionRadio1 -fo -filename ($ruta + "movies/" + $QnombrePB + "_PREV.mov")
+           -clearCache 1 -showOrnaments 1 -fp 1 -percent 100 -wh 1920 803 -offScreen -viewer 1 -useTraxSounds -compression "H.264" -quality 70;
+        FechaDeEscena (false);
+        }else{
+            warning ("CHECKEAR IN Y OUT");}
+}
+
+global proc FechaDeEscena (int $onOFF){
+  if ($onOFF==true){
+      if (`headsUpDisplay -ex HUDFecha` == 1) {headsUpDisplay -rem HUDFecha;}
+      if (`headsUpDisplay -ex HUDdatos` == 1) {headsUpDisplay -rem HUDdatos;}
+      if (`headsUpDisplay -ex HUDoperador` == 1) {headsUpDisplay -rem HUDoperador;}
+
+      // creo displays
+      string $fecha = ( `date -format "DD/MM/YY   /    hh:mm"`);
+      string $ruta =   `file -q -sn`;
+      string $operador = `python "socket.gethostbyname(socket.gethostname())" `;
+      headsUpDisplay -s 1 -b 1 -blockSize "small" -label ("Escena :"+$ruta)  -labelFontSize "small" HUDdatos;
+      headsUpDisplay -s 3 -b 1 -blockSize "small" -label ("FECHA / HORA : "+$fecha)  -labelFontSize "small"  HUDFecha;
+      headsUpDisplay -s 5 -b 1 -blockSize "small" -label ("Operador : "+$operador)  -labelFontSize "small"  HUDoperador;
+      }else{
+      // borro displays
+      headsUpDisplay -rem HUDFecha;
+      headsUpDisplay -rem HUDdatos;
+      headsUpDisplay -rem HUDoperador;}
+}
+
+global proc abrirCarpetas() {
+    system ("explorer/n," + "D:\\movies");
+}
+
+global proc refreshGUIplayblast(){
+    $animIN = `playbackOptions -q -ast`;
+    $animOUT = `playbackOptions -q -aet`;
+    intFieldGrp -e -v1 $animIN inFrame;
+    intFieldGrp -e -v1 $animOUT outFrame;
+    radioButtonGrp -e -select 2 botonRadio1;
+    button -e -bgc (rand (1)) (rand (1)) (rand (1)) boton_001;
+
+}
+
+global proc refreshGUIplayblastSecuenciaCompleta(){
+    string $listaShots [] = `ls -type shot`;
+    int $shotIN ;    int $secuenciaIN = `shot -q -sequenceStartTime $listaShots [0]`;
+    int $shotOUT;int $secuenciaOUT;
+    for ($cadaShot in $listaShots) {
+        $shotIN = `shot -q -sequenceStartTime $cadaShot`;
+        $shotOUT = `shot -q -sequenceEndTime $cadaShot`;
+        if ($shotIN < $secuenciaIN) {$secuenciaIN = $shotIN;}
+        if ($shotOUT > $secuenciaOUT) {$secuenciaOUT = $shotOUT;}
+    }
+    radioButtonGrp -e -select 1 botonRadio1;
+    intFieldGrp -e -v1 $secuenciaIN inFrame;
+    intFieldGrp -e -v1 $secuenciaOUT outFrame;
+    button -e -bgc (rand (1)) (rand (1)) (rand (1)) boton_001;
+}
+
+//////////////////////////////////////////////////////////////////////////
+scriptJob -e playbackRangeSliderChanged refreshGUIplayblast;
+playblasteaGUI();
+if (`objExists "sequencer1"`==1){
+	if( `popupMenu -exists cly_contextualTrash` ) {
+		deleteUI cly_contextualTrash;
+	}
+	popupMenu
+		-ctrlModifier 1
+		-button 3
+		-mm 1
+		-p sequenceEditorPanel1
+		-pmc (" refreshGUIplayblastSecuenciaCompleta()  ")
+	cly_contextualTrash;
+}else{print "PLAYBLAST ! v1.5: NO HAY SECUENCIA ARMADA";}

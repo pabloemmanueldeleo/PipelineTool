@@ -1,0 +1,55 @@
+global string $nombrePB;
+$nombrePB = "";
+global string $nameescena;
+string $winPlay= "playblastwindows";
+$nameescena = `file -q -sn -shn`;
+$nameescena =  `substring $nameescena 1 (size($nameescena)-3)`;
+if ( `window -exists $winPlay` ) { deleteUI $winPlay;}
+string $winPlay = `window  -tlc 967 45 -t "PH_PLAYBLAST v1.0"` ;
+
+string $Clayout1 = `columnLayout  -w 333 -p $winPlay `;
+string $Rlayout2 = `rowLayout   
+    -p $Clayout1 -numberOfColumns 6 
+    -columnWidth6 120 120 70 111 50 100
+    -columnAlign6  "center" "center" "center" "center"  "center" "center"
+    -columnAttach6 "right" "right" "right" "right" "right"  "right"
+        `;
+    
+intFieldGrp  -cw 1 50 -l "IN  =  "  inF;
+intFieldGrp  -cw 1 60 -l "OUT  =  " outF;
+text -l "Nombre: " -w 50;
+$nombrePB = `textField -w 200 -text $nameescena `;
+button  -p $Rlayout2 -l "PLAYBLAST !" -w 150 -command "tirarPlayblast()";
+button  -p $Rlayout2 -l "Abrir Movies" -w 150 -command  "abrirCarpetas()";
+
+
+
+showWindow $winPlay;
+ 
+global proc tirarPlayblast() {
+    global string $nombrePB;
+    global string $nameescena;
+
+        if (`headsUpDisplay -ex HUDObjectPosition` == 1) {headsUpDisplay -rem HUDObjectPosition;}
+        int $inF = (`intFieldGrp -q -v1 inF`);
+        int $outF = (`intFieldGrp -q -v1 outF`);
+            if ( $inF < $outF ) {
+                $QnombrePB = `textField -q -text $nombrePB `;
+                print ($QnombrePB);
+                headsUpDisplay -s 1 -b 0 -blockSize "medium" -label "Escena" -labelFontSize "large" -command "datosDeEscena()" 
+                              HUDObjectPosition;
+                playblast -fmt "qt" -startTime $inF  -endTime $outF -sequenceTime 1 -forceOverwrite -filename ("D:/movies/" + $QnombrePB + "_PREV.mov") 
+                   -clearCache 1 -showOrnaments 1 -fp 1 -percent 100 -wh 1920 803 -offScreen -viewer 1 -useTraxSounds -compression "H.264" -quality 70;
+                headsUpDisplay -rem HUDObjectPosition;
+                
+                }else{warning ("CHECKEAR IN Y OUT");}            
+}
+
+global proc string datosDeEscena (){
+                string $nombre =   `file -q -sn`;
+                $nombre += ("      Fecha: " + `date -format "DD/MM/YY       hh:mm"`);
+                return $nombre;   
+            }
+global proc abrirCarpetas() {
+    system ("explorer/n," + "D:\\movies");
+}

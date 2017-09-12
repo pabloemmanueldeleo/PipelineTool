@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "description": "", 
+    "user": "mmaus", 
+    "mayaSceneFile": "D:/PH_SCRIPTS/SCENES_RIG/poses/03_TICO.ma", 
+    "version": "1.0.0", 
+    "mayaVersion": "2015"
+  }
+,
+  "objects": {
+    "tico:Eye_Cont_ctrl": {
+      "attrs": {
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": 2.50397940077788
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 1.3486186507169349
+        }, 
+        "translateZ": {
+          "type": "doubleLinear", 
+          "value": 4.073695726364204
+        }
+      }
+    }
+  }
+}

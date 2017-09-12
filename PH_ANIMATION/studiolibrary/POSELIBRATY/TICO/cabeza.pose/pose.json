@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "description": "", 
+    "user": "mmaus", 
+    "mayaSceneFile": "D:/PH_SCRIPTS/SCENES_RIG/poses/03_TICO.ma", 
+    "version": "1.0.0", 
+    "mayaVersion": "2015"
+  }
+,
+  "objects": {
+    "tico:Ctrl_HeadEffector": {
+      "attrs": {
+        "Hair_Quality": {
+          "type": "double", 
+          "value": 1.0
+        }, 
+        "translateX": {
+          "type": "doubleLinear", 
+          "value": -0.3168996274471283
+        }, 
+        "translateY": {
+          "type": "doubleLinear", 
+          "value": 103.46395111083984
+        }, 
+        "translateZ": {
+          "type": "doubleLinear", 
+          "value": -5.880814552307129
+        }, 
+        "rotateX": {
+          "type": "doubleAngle", 
+          "value": -47.38322809022301
+        }, 
+        "rotateY": {
+          "type": "doubleAngle", 
+          "value": 3.8123132537516575
+        }, 
+        "rotateZ": {
+          "type": "doubleAngle", 
+          "value": 2.9164131440316736
+        }, 
+        "Hair_Visibility": {
+          "type": "bool", 
+          "value": false
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+
+//Creacion de nodos
+createNode "aiAOV" -n ("OBJECTID__AIAOV");
+createNode "aiAOV" -n ("OCCLUSION__AIAOV");
+createNode "aiAmbientOcclusion" -n ("AO__AIAO");
+createNode "aiUtility" -n ("ID__AIUTL");
+setAttr ("ID__AIUTL.shadeMode") 2;
+setAttr "ID__AIUTL.colorMode" 21;
+
+//Conexion con ID
+connectAttr -f ("OBJECTID__AIAOV"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("OBJECTID__AIAOV"+".type") 5;
+setAttr -type "string" OBJECTID__AIAOV.name "OBJECT_ID";
+connectAttr -f "defaultArnoldDriver.message" ("OBJECTID__AIAOV"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("OBJECTID__AIAOV"+".outputs[0].filter");
+connectAttr -f ("ID__AIUTL.outColor") ("OBJECTID__AIAOV"+".defaultValue");
+select -cl;
+
+//Conexion con occlusion
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+connectAttr -f ("OCCLUSION__AIAOV"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("OCCLUSION__AIAOV"+".type") 5;
+setAttr -type "string" OCCLUSION__AIAOV.name "OCCLUSION";
+connectAttr -f "defaultArnoldDriver.message" ("OCCLUSION__AIAOV"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("OCCLUSION__AIAOV"+".outputs[0].filter");
+connectAttr -f ("AO__AIAO.outColor") ("OCCLUSION__AIAOV"+".defaultValue");
+select -cl;
+
+createNode "aiUtility" -n ("ID__SHD");
+setAttr ("ID__SHD.shadeMode") 2;
+setAttr "ID__SHD.colorMode" 21;
+
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+createNode "aiAOV" -n ("aiAOV_OBJECT_ID");
+connectAttr -f ("aiAOV_OBJECT_ID"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_OBJECT_ID"+".type") 5;
+setAttr -type "string" aiAOV_OBJECT_ID.name "OBJECT_ID";
+
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_OBJECT_ID"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_OBJECT_ID"+".outputs[0].filter");
+
+connectAttr -f ("ID__SHD.outColor") ("aiAOV_OBJECT_ID"+".defaultValue");
+
+select -cl;
+
+createNode "aiAmbientOcclusion" -n ("AO__SHD");
+
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+createNode "aiAOV" -n ("aiAOV_OCCLUSION");
+connectAttr -f ("aiAOV_OCCLUSION"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_OCCLUSION"+".type") 5;
+setAttr -type "string" aiAOV_OCCLUSION.name "OCCLUSION";
+
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_OCCLUSION"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_OCCLUSION"+".outputs[0].filter");
+
+connectAttr -f ("AO__SHD.outColor") ("aiAOV_OCCLUSION"+".defaultValue");
+
+select -cl;

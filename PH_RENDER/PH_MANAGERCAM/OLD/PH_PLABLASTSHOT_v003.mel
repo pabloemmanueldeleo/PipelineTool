@@ -1,0 +1,81 @@
+
+proc playblasteaGUI (){
+    global string $nombrePB;
+    $nombrePB = "";
+    int $animIN = `playbackOptions -q -ast`;
+    int $animOUT = `playbackOptions -q -aet`;
+    
+
+    global string $nameescena;
+    $nameescena = `file -q -sn -shn`;
+    $nameescena =  `substring $nameescena 1 (size($nameescena)-3)`;
+    
+    global string $winPlay;
+    if ( `window -exists $winPlay` ) { deleteUI $winPlay;}
+    string $winPlay = `window  -s 0 -tlc 967 45 -t "PH_PLAYBLAST v1.1"` ;
+    print ($winPlay);
+    
+    string $Clayout1 = `columnLayout  -w 333 -p $winPlay `;
+    string $Rlayout2 = `rowLayout -p $Clayout1 -numberOfColumns 7`;
+
+        
+    radioButtonGrp -columnAlign 1 "left" -columnAlign 2 "left" -numberOfRadioButtons 2 -cw 1 60 -vertical -label "In/Out de " -select 2 -labelArray2 "Secuencia" "Timeline" botonRadio1;
+    global string $inFrame="";    $inFrame= `intFieldGrp  -cw 1 33 -l "IN  =  "  -v1 $animIN inFrame`; 
+
+    global string $outFrame="";    $outFrame= `intFieldGrp  -cw 1 44 -l "OUT  =  " -v1 $animOUT outFrame`;
+
+    text -l "Nombre: " -w 50;
+    $nombrePB = `textField -w 150 -text $nameescena `;
+    button  -p $Rlayout2 -l "PLAYBLAST !" -w 100 -command "tirarPlayblast()";
+    button  -p $Rlayout2 -l "Abrir Movies" -w 100 -command  "abrirCarpetas()";
+  
+    showWindow $winPlay;
+}
+ 
+proc tirarPlayblast() {
+    global string $nombrePB;
+    global string $nameescena;
+    global int $seleccionRadio1;
+
+        if (`headsUpDisplay -ex HUDObjectPosition` == 1) {headsUpDisplay -rem HUDObjectPosition;}
+        int $inF = (`intFieldGrp -q -v1 inFrame`);
+        int $outF = (`intFieldGrp -q -v1 outFrame`);
+            if ( $inF < $outF ) {
+                select -cl;
+                $QnombrePB = `textField -q -text $nombrePB `;
+                //IN OUT de secuencia o de timeline??
+                $seleccionRadio1 = `radioButtonGrp -q -sl botonRadio1`;
+                if ($seleccionRadio1 == 2){ $seleccionRadio1 = 0;}
+                print ($seleccionRadio1 + "\n");
+                headsUpDisplay -s 1 -b 0 -blockSize "medium" -label "Escena" -labelFontSize "large" -command "datosDeEscena()" 
+                              HUDObjectPosition;
+                playblast -fmt "qt" -startTime $inF  -endTime $outF -sequenceTime $seleccionRadio1 -forceOverwrite -filename ("D:/movies/" + $QnombrePB + "_PREV.mov") 
+                   -clearCache 1 -showOrnaments 1 -fp 1 -percent 100 -wh 1920 803 -offScreen -viewer 1 -useTraxSounds -compression "H.264" -quality 70;
+                headsUpDisplay -rem HUDObjectPosition;
+                
+                }else{warning ("CHECKEAR IN Y OUT");}            
+}
+
+proc string datosDeEscena (){
+                string $nombre =   `file -q -sn`;
+                $nombre += ("      Fecha: " + `date -format "DD/MM/YY       hh:mm"`);
+                return $nombre;   
+            }
+proc abrirCarpetas() {
+    system ("explorer/n," + "D:\\movies");
+}            
+
+proc refreshGUIplayblast(){
+    
+    
+    $animIN = `playbackOptions -q -ast`;    
+    $animOUT = `playbackOptions -q -aet`;
+    intFieldGrp -e -v1 $animIN inFrame;
+    intFieldGrp -e -v1 $animOUT outFrame;
+    radioButtonGrp -e -select 2 botonRadio1;
+    
+
+
+}
+playblasteaGUI ();
+scriptJob -e playbackRangeSliderChanged refreshGUIplayblast;

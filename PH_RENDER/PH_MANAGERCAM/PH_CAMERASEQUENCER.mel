@@ -1,0 +1,198 @@
+// RIGS a CAMARA SEQUENCER 07/09/2015
+
+float $howManyKeys[];
+int $last;
+float $DuracionSecuenciaaa = 0;
+string $shotname;
+string $CamsCNTSH[]=  `ls("C_E*P*__CNT")`;
+int $i = 1;
+float $howManyKeys[];
+int $ultimokey=0;
+int $cantK;
+string $list[];
+//variables de Avisos
+string $objetosProblematicos[];clear $objetosProblematicos;
+string $avisos[];clear $avisos;
+string $avisosColapsado="";
+string $avisosColapsado2="";
+int $indexAvisos=0; int $indexObjetos=0;
+string $tipoShape = "";
+//fin de variables de Avisos
+
+global proc float [] floatArrayRemoveDuplicates(float $list[]){
+                float $item, $results[];
+                int $index = 0, $found;
+                for ($item in $list){
+                    $found = 0;
+                    for ($result in $results)
+                        if ($result == $item)
+                            $found = 1;
+                    if (!$found)
+                        $results[$index++] = $item;
+                }
+                return $results;
+}
+
+// DESLOCKEO PARA PODER CREAR LA SECUENCIA
+
+if (  size($CamsCNTSH) != 0  ){
+    for ($rig in $CamsCNTSH){
+        setAttr -lock 0 ($rig+".tx") ;
+        setAttr -lock 0 ($rig+".ty") ;
+        setAttr -lock 0 ($rig+".tz") ;
+        setAttr -lock 0 ($rig+".rx") ;
+        setAttr -lock 0 ($rig+".ry") ;
+        setAttr -lock 0 ($rig+".rz") ;
+        setAttr -lock 0 ($rig+".sx") ;
+        setAttr -lock 0 ($rig+".sy") ;
+        setAttr -lock 0 ($rig+".sz") ;
+    }
+}
+
+
+
+
+for($everySel in $CamsCNTSH){
+    $cantK= `keyframe -query -keyframeCount $everySel`;
+    $list = `listRelatives -s  $everySel`;
+    $tipoShape = `objectType  $list[0]`;
+    if ($tipoShape !="nurbsCurve"){
+        $avisos [$indexAvisos]= ($everySel + " es " + $tipoShape);++$indexAvisos;
+        $objetosProblematicos [$indexObjetos] = $everySel;++$indexObjetos;
+    }
+    if ($cantK ==0){
+        $avisos [$indexAvisos]= ($everySel + " no tiene keys");++$indexAvisos;
+        $objetosProblematicos [$indexObjetos] = $everySel;++$indexObjetos;
+    }
+
+}
+
+for($aviso in $avisos){print ($aviso  + "\n" );}
+
+
+//PISTA L
+if ( size($avisos) == 0){
+    for($everySel in $CamsCNTSH)
+    {
+        $myKeys = `keyframe -q -name $everySel`;
+        $howManyKeys = `keyframe -q -timeChange $everySel`;
+        $howManyKeys = `sort $howManyKeys  `;
+        //almaceno ultimo key
+        for ($hmk in $howManyKeys) { if ($hmk>$ultimokey){$ultimokey = $hmk;} }
+        //creo shot
+        string $shot = `shot $everySel`;
+        //creo shotname
+        $shotname = `substring $everySel 3 (size($everySel)-5)`;
+        //edito shot
+        shot -e -trk 1 -startTime $howManyKeys[0] -endTime $ultimokey -sn $shotname -cc ("L_"+$shotname + "__CAM") $shot;
+        rename ("C_"+ $shotname + "__CNT1") ("L_"+ $shotname + "__SHO");
+        $shot = ("L_"+ $shotname + "__SHO");
+        shot -e -trk 0 $shot;
+
+        //sumo duraciones para las siguientes
+        if ($i>=1){shot -e -sst $DuracionSecuenciaaa $shot;}
+        $DuracionSecuenciaaa += `shot -q -sqd $shot`;
+        $i+=1;
+        clear $howManyKeys;
+        $ultimokey = 0;
+    }//for
+}else{
+    $avisos = stringArrayRemoveDuplicates($avisos);
+    $objetosProblematicos = stringArrayRemoveDuplicates ($objetosProblematicos);
+    for ($elemento in $avisos) {$avisosColapsado+= ("\n" + $elemento);}
+    string $btn_ret = `confirmDialog -title "REVISAR:" -bgc 1 1 0
+    -message ("-Cams con ningun key\n-Cams con un solo key\n-Objetos nombrados como curvas pero no lo son:\n -Curvas con atributos lockeados:"+ $avisosColapsado )
+    -button "Seleccionarlos"
+    -button "Cerrar"
+    -defaultButton "Seleccionarlos"`;
+
+    if( $btn_ret == "Seleccionarlos" ) {
+        for ($elem_prob in $objetosProblematicos){select -add $elem_prob;}
+    }else if( $btn_ret == "Cerrar" ) { headsUpMessage ("REVISATE LAS CAMARAS CON PROBLEMAS PARA ARMAR BIEN EL CAMERA SEQUENCER...\n\n"); }
+}
+
+
+//PISTA R
+
+$i = 1;
+$ultimokey=0;
+$DuracionSecuenciaaa = 0;
+
+
+if ( size($avisos) == 0){
+    for($everySel in $CamsCNTSH)
+    {
+        $myKeys = `keyframe -q -name $everySel`;
+        $howManyKeys = `keyframe -q -timeChange $everySel`;
+        $howManyKeys = `sort $howManyKeys  `;
+        //almaceno ultimo key
+        for ($hmk in $howManyKeys) { if ($hmk>$ultimokey){$ultimokey = $hmk;} }
+        //creo shot
+        string $shot = `shot $everySel`;
+        //creo shotname
+        $shotname = `substring $everySel 3 (size($everySel)-5)`;
+        //edito shot
+        shot -e -trk 3 -startTime $howManyKeys[0] -endTime $ultimokey -sn $shotname -cc ("R_"+$shotname + "__CAM") $shot;
+        rename ("C_"+ $shotname + "__CNT1") ("R_"+ $shotname + "__SHO");
+        $shot = ("R_"+ $shotname + "__SHO");
+
+        //sumo duraciones para las siguientes
+        if ($i>=1){shot -e -sst $DuracionSecuenciaaa $shot;}
+        $DuracionSecuenciaaa += `shot -q -sqd $shot`;
+        $i+=1;
+        clear $howManyKeys;
+        $ultimokey = 0;
+    }//for
+}
+
+
+
+//PISTA C
+
+$i = 1;
+$ultimokey=0;
+$DuracionSecuenciaaa = 0;
+
+
+if ( size($avisos) == 0){
+    for($everySel in $CamsCNTSH)
+    {
+        $myKeys = `keyframe -q -name $everySel`;
+        $howManyKeys = `keyframe -q -timeChange $everySel`;
+        $howManyKeys = `sort $howManyKeys  `;
+        //almaceno ultimo key
+        for ($hmk in $howManyKeys) { if ($hmk>$ultimokey){$ultimokey = $hmk;} }
+        //creo shot
+        string $shot = `shot $everySel`;
+        //creo shotname
+        $shotname = `substring $everySel 3 (size($everySel)-5)`;
+        //edito shot
+        shot -e -trk 5 -startTime $howManyKeys[0] -endTime $ultimokey -sn $shotname -cc ("C_"+$shotname + "_SCAM") $shot;
+        rename ("C_"+ $shotname + "__CNT1") ("C_"+ $shotname + "__SHO");
+        $shot = ("C_"+ $shotname + "__SHO");
+
+        //sumo duraciones para las siguientes
+        if ($i>=1){shot -e -sst $DuracionSecuenciaaa $shot;}
+        $DuracionSecuenciaaa += `shot -q -sqd $shot`;
+        $i+=1;
+        clear $howManyKeys;
+        $ultimokey = 0;
+    }//for
+}
+
+
+// DESLOCKEO PARA PODER CREAR LA SECUENCIA
+
+if (  size($CamsCNTSH) != 0  ){
+    for ($rig in $CamsCNTSH){
+        setAttr -lock 1 ($rig+".tx") ;
+        setAttr -lock 1 ($rig+".ty") ;
+        setAttr -lock 1 ($rig+".tz") ;
+        setAttr -lock 1 ($rig+".rx") ;
+        setAttr -lock 1 ($rig+".ry") ;
+        setAttr -lock 1 ($rig+".rz") ;
+        setAttr -lock 1 ($rig+".sx") ;
+        setAttr -lock 1 ($rig+".sy") ;
+        setAttr -lock 1 ($rig+".sz") ;
+    }
+}

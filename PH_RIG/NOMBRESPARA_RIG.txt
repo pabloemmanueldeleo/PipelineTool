@@ -1,0 +1,26 @@
+	(SIDE)_(NAMEOBJECT)_(OTHERDESCRIPTION)__(TIPO DE NODO)
+
+OBJETOS:*
+ 
+	C_CUBO_CUBO__TRF - Transform (se usa para hacer offset de otro 'TRF' o control 'CNT')
+	
+	C_CUBO_CUBO__GRP - grupo
+	
+	C_CUBO_CARA1__TRF - transform del mesh
+		C_CUBO_CARA1__MSH
+
+	*dependiendo el nodo es el sufijo final
+
+	C_TITO_TITO__CNT - Transform del control animacion
+		C_TITO_TITO__CNTSH - control animacion nurvCurve
+	
+	L_E56_P02__CAM - Transform de la Camara comun
+		L_E56_P02__CAMSH - shape de la Camara comun
+
+	L_E56_P02__SCAM - Transform de la CamaraStereo
+		L_E56_P02__SCAMSH - shape de la Camara Stereo
+
+
+
+IMPORTANTE SIEMPRE MIRAR LOS SUFIJOS DE LOS NODOS QUE ESTAN EN:
+M:\PH_SCRIPTS\SCRIPTS\suffNodes.py

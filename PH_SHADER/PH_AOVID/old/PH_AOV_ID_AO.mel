@@ -1,0 +1,52 @@
+//cargo el pluging arnold si no existe
+if(!`pluginInfo -query -loaded -name "mtoa.mll"`) {
+          loadPlugin mtoa.mll;
+          pluginInfo -edit -autoload true "mtoa.mll";}
+//set defauld arnold
+setAttr -type "string" defaultRenderGlobals.currentRenderer "arnold";
+
+//get aov defauld
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+
+
+//Creacion de nodos
+if(!"aiAOV_OBJECT_ID"){
+createNode "aiAOV" -n ("aiAOV_OBJECT_ID");
+print ("Se creo el nodo aiAOV_OBJECT_ID");}
+else{print(" Ya existe aiAOV_OBJECT_ID\n");}
+
+if(!"aiAOV_OCCLUSION"){
+createNode "aiAOV" -n ("aiAOV_OCCLUSION");
+print ("Se creo el nodo aiAOV_OCCLUSION");}
+else{print(" Ya existe aiAOV_OCCLUSION\n");}
+
+if(!"AO__SHD"){
+createNode "aiAmbientOcclusion" -n ("AO__SHD");
+print ("Se creo el nodo AO__SHD");}
+else{print(" Ya existe AO__SHD\n");}
+
+if(!"ID__SHD"){
+createNode "aiUtility" -n ("ID__SHD");
+setAttr ("ID__SHD.shadeMode") 2;
+setAttr "ID__SHD.colorMode" 21;
+print(" Ya existe ID__SHD\n");}
+else{print(" Ya existe ID__SHD\n");}
+
+//Conexion con ID
+connectAttr -f ("aiAOV_OBJECT_ID"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_OBJECT_ID"+".type") 5;
+setAttr -type "string" aiAOV_OBJECT_ID.name "OBJECT_ID";
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_OBJECT_ID"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_OBJECT_ID"+".outputs[0].filter");
+connectAttr -f ("ID__SHD.outColor") ("aiAOV_OBJECT_ID"+".defaultValue");
+select -cl;
+
+//Conexion con occlusion
+string $aov_list = `getAttr -s "defaultArnoldRenderOptions.aovList"`;
+connectAttr -f ("aiAOV_OCCLUSION"+".message") ("defaultArnoldRenderOptions.aovList["+ $aov_list +"]");
+setAttr ("aiAOV_OCCLUSION"+".type") 5;
+setAttr -type "string" aiAOV_OCCLUSION.name "OCCLUSION";
+connectAttr -f "defaultArnoldDriver.message" ("aiAOV_OCCLUSION"+".outputs[0].driver");
+connectAttr -f "defaultArnoldFilter.message" ("aiAOV_OCCLUSION"+".outputs[0].filter");
+connectAttr -f ("AO__SHD.outColor") ("aiAOV_OCCLUSION"+".defaultValue");
+select -cl;

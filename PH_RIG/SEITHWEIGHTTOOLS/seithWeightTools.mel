@@ -1,0 +1,363 @@
+// =========================
+// swt
+// =========================
+
+// Initializing global variables.
+global string $swtModule;
+global string $swtVersion;
+global string $swtDefaultPath;
+$swtVersion = "5.1";
+$swtDefaultPath = `workspace -q -rd` + "scenes/weights";
+global int $swtQuickPathsSlots;
+global int $swtQuickPathsCharactersLimit;
+$swtQuickPathsSlots = 10;
+$swtQuickPathsCharactersLimit = 80;
+
+// -------------------------------------------------------------
+// Dependencies:
+if ( `filetest -d "F:/maya_scripts/my_scripts"` )
+	$swtModule = "seithWeightToolsModule_001f";
+else
+	$swtModule = "seithWeightToolsModule";
+
+python("import " + $swtModule + " as seithWeightTools");
+python("reload(seithWeightTools)");
+
+// -------------------------------------------------------------
+
+// Misc:
+global proc swtSavePrefs()
+	{
+	string $lastPlaceTmp = `textFieldButtonGrp -q -label swtTextFieldTFBG`;
+	optionVar -stringValue lastPlaceStatus $lastPlaceTmp;
+
+	if ( `radioButton -q -sl pointNumberLoadRB` )
+		optionVar -stringValue swtLoadMethod "number";
+	else
+		optionVar -stringValue swtLoadMethod "position";
+
+	print "\nseithWeightTools preferences have been saved!";
+	}
+
+
+global proc swtBrowseForFolder()
+	{
+	string $startDir = `textFieldButtonGrp -q -label swtTextFieldTFBG`;
+	string $result[] = `fileDialog2 -dialogStyle 2 -fileMode 3 -startingDirectory $startDir -okCaption "Pick Folder"`;
+
+	if ( $result[0] != "" )
+		{
+		textFieldButtonGrp -e -label $result swtTextFieldTFBG;
+		}
+	}
+
+
+global proc swtOpenCurrentFolderInExplorer()
+	{
+	string $lastPlaceTmp = `textFieldButtonGrp -q -label swtTextFieldTFBG`;
+	string $lastPlace = toNativePath( $lastPlaceTmp );
+	system ("start explorer /n,/e, " + $lastPlace);
+	}
+
+
+global proc swtUpdateDirectory()
+	{
+	string $updatedDirectory = `textFieldButtonGrp -q -text swtTextFieldTFBG`;
+	string $workspace = ( `textFieldButtonGrp -q -label swtTextFieldTFBG` + "/" + $updatedDirectory ); // NT
+	textFieldButtonGrp -e -label $workspace -ann $workspace swtTextFieldTFBG;
+	textFieldButtonGrp -e -text "" swtTextFieldTFBG;
+	sysFile -makeDir $workspace;
+	}
+
+
+global proc swtMoveUp()
+	{
+	string $updatedDirectory = `textFieldButtonGrp -q -label swtTextFieldTFBG`;
+
+	string $buffer[];
+	int $numTokens = `tokenize $updatedDirectory "/" $buffer`;
+	string $newPath = $buffer[0];
+
+	for ($i=1;$i<`size $buffer`-1;$i++)
+		{
+		$newPath = $newPath + "/" + $buffer[$i];
+		}
+	//print ("\n" + $newPath);
+
+	textFieldButtonGrp -e -label $newPath -ann $newPath swtTextFieldTFBG;
+	}
+
+
+// Quick paths:
+global proc swtAddQuickPath()
+	{
+	global int $swtQuickPathsSlots;
+	global int $swtQuickPathsCharactersLimit;
+	string $currentPath = `textFieldButtonGrp -q -label swtTextFieldTFBG`;
+
+	// Get the current quick paths list.
+	string $storedQuickPaths[] = {};
+	
+	for ($i=1;$i<$swtQuickPathsSlots+1;$i++)
+		{
+		$storedQuickPaths[$i] = `menuItem -q -docTag ("swt_quickPath" + $i + "MI")`;
+		}
+
+	// If the current path is not already in the quick paths:
+	if ( !stringArrayContains($currentPath, $storedQuickPaths) )
+		{
+		// Slide down each slot one and put the latest path on top...
+		for ($i=$swtQuickPathsSlots;$i>1;$i--)
+			{
+			menuItem -e -docTag `menuItem -q -docTag ("swt_quickPath" + ($i-1) + "MI")` -l `menuItem -q -l ("swt_quickPath" + ($i-1) + "MI")` ("swt_quickPath" + $i + "MI");
+			}
+
+		string $formattedPath = fromNativePath($currentPath);
+		string $trunkatedPath = swtFormatQuickPath($formattedPath);
+		menuItem -e -docTag $currentPath -l $trunkatedPath "swt_quickPath1MI";
+
+		// Update the optionVars.
+		for ($i=1;$i<$swtQuickPathsSlots+1;$i++)
+			{
+			//if ( `optionVar -ex ("swt_quickPath" + $i)` )
+			optionVar -stringValue ("swt_quickPath" + $i) `menuItem -q -docTag ("swt_quickPath" + $i + "MI")`;
+			}
+		}
+	else
+		print "\nThis path is already bookmarked!";
+	
+	//print $storedQuickPaths;
+	}
+
+
+global proc swtRemoveQuickPath()
+	{
+	global int $swtQuickPathsSlots;
+	global int $swtQuickPathsCharactersLimit;
+	string $currentPath = `textFieldButtonGrp -q -label swtTextFieldTFBG`;
+
+	// Get the current quick paths list.
+	string $storedQuickPaths[] = {};
+	
+	for ($i=1;$i<$swtQuickPathsSlots+1;$i++)
+		{
+		$storedQuickPaths[$i] = `menuItem -q -docTag ("swt_quickPath" + $i + "MI")`;
+		}
+
+	// If the current path is not already in the quick paths:
+	if ( stringArrayContains($currentPath, $storedQuickPaths) )
+		{
+		for ($i=1;$i<$swtQuickPathsSlots+1;$i++)
+			{
+			if ( `menuItem -q -docTag ("swt_quickPath" + $i + "MI")` == $currentPath )
+				{
+				// Slide up all the remaining slots.
+				for ($j=$i;$j<$swtQuickPathsSlots;$j++)
+					{
+					menuItem -e -docTag `menuItem -q -docTag ("swt_quickPath" + ($j+1) + "MI")` -l `menuItem -q -l ("swt_quickPath" + ($j+1) + "MI")` ("swt_quickPath" + $j + "MI");
+					optionVar -stringValue ("swt_quickPath" + $j) `menuItem -q -docTag ("swt_quickPath" + $j + "MI")`;
+					}
+
+				// Set the last slot to empty.
+				menuItem -e -docTag "<empty>" -l "<empty>" ("swt_quickPath" + $swtQuickPathsSlots + "MI");
+				optionVar -stringValue ("swt_quickPath" + $swtQuickPathsSlots) "<empty>";
+
+				print "\nQuick path deleted!";
+				break;
+				}
+			}
+		}
+	else
+		print "\nThis path is not bookmarked!";
+	}
+
+
+global proc swtSetQuickPath(string $quickPath)
+	{
+	textFieldButtonGrp -e -label `menuItem -q -docTag $quickPath` swtTextFieldTFBG;
+	}
+
+
+global proc swtDeleteAllQuickPaths()
+	{
+	global int $swtQuickPathsSlots;
+
+	for ($i=1;$i<$swtQuickPathsSlots+1;$i++)
+		{
+		menuItem -e -docTag "<empty>" -l "<empty>" ("swt_quickPath" + $i + "MI");
+		optionVar -stringValue ("swt_quickPath" + $i) "<empty>";
+		}
+
+	print "\nAll quick paths have been deleted!";
+	}
+
+
+global proc string swtFormatQuickPath(string $path)
+	{
+	// Format the path so that it fits within the optionMenu width.
+	global int $swtQuickPathsCharactersLimit;
+
+	if ( $path != "<empty>" )
+		{
+		int $pathLength = `size $path`;
+		string $buffer[];
+		int $numTokens = `tokenize $path "/" $buffer`;
+
+		if ( $pathLength <= $swtQuickPathsCharactersLimit )
+			return ($path);
+		else
+			{
+			string $candidate = $buffer[0] + "/" + $buffer[1] + "/.../" + $buffer[`size $buffer`-2] + "/" + $buffer[`size $buffer`-1];
+			int $pathLength = `size $path`;
+			if ( `size $candidate` >= ($swtQuickPathsCharactersLimit+1) )
+				$candidate = `substring $path 1 10` + "..." + `substring $path ($pathLength-26) $pathLength`;
+
+			return $candidate;
+			}
+		}
+	else
+		return("<empty>");
+	}
+
+
+// Main UI proc:
+global proc seithWeightTools()
+	{
+	global string $swtVersion;
+	global string $swtDefaultPath;
+	global string $currentProject = "";
+	global int $swtQuickPathsSlots;
+	global int $swtQuickPathsCharactersLimit;
+
+	if (`window -exists seithWeightToolsWindow` )
+		deleteUI seithWeightToolsWindow;
+
+	window -tlb off -rtf on -menuBar true -sizeable true -width 100 -height 50 -title ("seithWeightTools v" + $swtVersion ) seithWeightToolsWindow; 
+
+	int $h = 22;
+	int $w = 420;
+
+		columnLayout -adjustableColumn true wtMainColumnCL;
+			frameLayout -mw 5 -bv on -lv off -collapsable false -borderStyle "etchedIn" -w ($w-10) -p wtMainColumnCL wtPathFrameFL;
+				columnLayout -adjustableColumn true -p wtPathFrameFL;
+
+					separator -st "none" -h 2;
+					optionMenu -w ($w-24) -cc ("swtSetQuickPath(\"swt_quickPath\" + `optionMenu -q -sl swtQuickPathsOM` + \"MI\")") swtQuickPathsOM;
+
+					rowLayout -numberOfColumns 2 totoRL;
+						textFieldButtonGrp -cw3 310 70 3 -adj on /*-bgc .5 .5 .5*/
+							-label $swtDefaultPath -text ""
+							-cc swtUpdateDirectory -bc "swtBrowseForFolder" -bl "..."
+						swtTextFieldTFBG;
+
+						popupMenu -button 3 pathPopupMenu;
+							menuItem -en on -label "Add To Quick Paths" -c "swtAddQuickPath";
+							menuItem -en on -label "Remove From Quick Paths" -c "swtRemoveQuickPath";
+							menuItem -divider true;
+							menuItem -en on -label "Open In Explorer" -c "swtOpenCurrentFolderInExplorer";
+							menuItem -divider true;
+							menuItem -en on -label "Delete All Quick Paths" -c "swtdeleteAllQuickPaths";
+
+					button -l "Up" -c "swtMoveUp";
+
+					setParent ..;
+				
+					separator -st "none" -h 2;
+
+				setParent ..;
+			setParent ..;
+
+			separator -st "none" -h 4;
+
+			frameLayout -mw 5 -bv off -lv off -collapsable false -p wtMainColumnCL swtOptionsFrameFL;
+				rowColumnLayout -nc 4 -cw 1 110 -cw 2 75 -cw 3 100 -cw 4 90 -co 3 "left" 10 -co 4 "left" 10 -p swtOptionsFrameFL;
+
+					text -align "center" -l "Threshold Value:" swtThreshText;
+					floatField -height 22 -v 0.001 -pre 6 -min 0 swtThreshFieldFF;
+					radioCollection;
+					radioButton -label "World Space" swtGlobalRB;
+					radioButton -label "Local Space" -sl swtLocalRB;
+					setParent ..;
+
+				setParent ..;
+
+			separator -st "none" -h 2;
+
+			frameLayout -mw 5 -bv off -lv off -collapsable false -borderStyle "etchedIn" /*-w 480*/ -p wtMainColumnCL swtSaveFrameFL;
+				rowColumnLayout -nc 3 -cw 1 136 -cw 2 130 -cw 3 110 -co 2 "left" 20 -p swtSaveFrameFL;
+
+					separator -st "none" -h 2; separator -st "none" -h 2; separator -st "none" -h 2;
+					button -h $h -label "Save Weights ->" -command "python(\"seithWeightTools.seithWeightsSave()\")";
+					checkBox -label " by Point Number" -align "left" -v 1 pointNumberSaveCB;
+					checkBox -label " by Point Position" -align "left" -v 1 pointPositionSaveCB;
+					separator -st "none" -h 2; separator -st "none" -h 2; separator -st "none" -h 2;
+
+				setParent ..;
+			setParent ..;
+
+			separator -st "none" -h 2;
+
+			frameLayout -mw 5 -bv off -lv off -collapsable false -borderStyle "etchedIn" /*-w 480*/ -p wtMainColumnCL swtLoadFrameFL;
+				rowColumnLayout -nc 3 -cw 1 136 -cw 2 130 -cw 3 110 -co 2 "left" 20 -p swtLoadFrameFL;
+
+					separator -st "none" -h 2; separator -st "none" -h 2; separator -st "none" -h 2;
+					button -h $h -label "Load Weights ->" -command "python(\"seithWeightTools.seithWeightsLoad(None, None, None)\")";
+
+					radioCollection;
+						radioButton -label " by Point Number" -align "left" -sl
+							-onc "text -e -en off swtThreshText; floatField -e -en off swtThreshFieldFF" pointNumberLoadRB;
+						radioButton -label " by Point Position" -en on -align "left"
+							-onc "text -e -en on swtThreshText; floatField -e -en on swtThreshFieldFF" pointPositionLoadRB;
+					separator -st "none" -w $w -h 2; separator -st "none" -w 500 -h 2; separator -st "none" -w 500 -h 2;
+
+				setParent ..;
+			setParent ..;
+
+			separator -st "none" -h 4;
+			button -h $h -label "Save Preferences" -command "swtSavePrefs";
+			separator -st "none" -h 1;
+			text -al "right" -bgc .3 .4 .3 -fn "smallBoldLabelFont" -l "© SeithCG.com ";
+			//"boldLabelFont", "smallBoldLabelFont", "tinyBoldLabelFont", "plainLabelFont", "smallPlainLabelFont", "obliqueLabelFont", "smallObliqueLabelFont", "fixedWidthFont" and "smallFixedWidthFont"
+
+	// -------------------------
+	// Load preferences
+	// -------------------------
+	if ( `optionVar -exists lastPlaceStatus` )
+		textFieldButtonGrp -e -label `optionVar -q lastPlaceStatus` -ann `optionVar -q lastPlaceStatus` swtTextFieldTFBG;
+	else
+		// Create the weights directory (if it dosn't exist).
+		sysFile -makeDir $swtDefaultPath;
+
+	if ( `optionVar -ex swtLoadMethod` )
+		{
+		if ( `optionVar -q swtLoadMethod` == "number" )
+			radioButton -e -sl pointNumberLoadRB;
+		else
+			radioButton -e -sl pointPositionLoadRB;
+		}
+
+	if ( `radioButton -q -sl pointNumberLoadRB` )
+		{
+		text -e -en off swtThreshText;
+		floatField -e -en off swtThreshFieldFF;
+		}
+
+	// Fill in the QuickPaths:
+	for ($i=1;$i<$swtQuickPathsSlots+1;$i++)
+		{
+		if ( `optionVar -ex ("swt_quickPath" + $i)` )
+			{
+			string $formattedPath = fromNativePath(`optionVar -q ("swt_quickPath" + $i)`);
+			string $trunkatedPath = swtFormatQuickPath($formattedPath);
+			menuItem -docTag $formattedPath -l $trunkatedPath -p swtQuickPathsOM ("swt_quickPath" + $i + "MI");
+			}
+		else
+			menuItem -docTag "<empty>" -l "<empty>" -p swtQuickPathsOM ("swt_quickPath" + $i + "MI");
+		}
+
+	showWindow seithWeightToolsWindow;
+
+	// Resize the window.
+	window -e -w 456 seithWeightToolsWindow;
+	optionMenu -e -w 438 swtQuickPathsOM;
+	}

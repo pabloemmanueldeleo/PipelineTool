@@ -1,0 +1,268 @@
+python "import socket";
+
+//Creador de marca de agua para playblast
+global proc string createWaterMark( string $camaraIP, string $waterMark ){
+	string $curPane;
+	$curPane = `getPanel -withFocus`;
+	if ($curPane == "scriptEditorPanel1"){$curPane = "modelPanel4";}
+	string $cam;
+	$cam = $camaraIP;
+	string $waterMark;
+	$trfC = `listRelatives -ap $cam`;
+	string $nodoImp="";string $trfIP[];string $trfIP_Ren="";
+
+	if (`objExists "WATERMARK__IMPSH"`==0){
+		$nodoImp = `createNode imagePlane -n ($cam+"_WATERMARK__IMPSH")`;
+		$trfIP = `listRelatives -ap $nodoImp`;
+		$trfIP_Ren = `rename $trfIP[0] ($cam+"_WATERMARK__IMP")`;
+		parent $trfIP_Ren $trfC;
+		string $imagePlaneFile;
+		$imagePlaneFile = $waterMark;
+		setAttr ( $nodoImp + ".imageName" ) -type "string" $imagePlaneFile;
+		connectAttr -f ( $nodoImp + ".message" ) ( $cam+".imagePlane[0]" );
+		//AEinvokeFitFilmGate ( $cam + ".sizeX") ( $nodoImp + ".sizeY" );
+		setAttr ( $nodoImp + ".fit" ) 2;
+		setAttr ( $nodoImp + ".coverageX" ) 1920;
+		setAttr ( $nodoImp + ".coverageY" ) 1080;
+		setAttr ( $nodoImp + ".imageCenterZ" ) -19.800;
+		setAttr ( $nodoImp + ".width" ) 19.2;
+		setAttr ( $nodoImp + ".height" ) 10.8;
+		setAttr ( $nodoImp + ".displayMode" ) 3;
+		setAttr ( $nodoImp + ".colorOffset" ) -type double3 0 0 0 ;
+		setAttr ( $nodoImp + ".alphaGain" ) 0.15;
+		setAttr ( $nodoImp + ".depth" ) 1;
+		setAttr ( $nodoImp + ".sizeX" ) 1;
+	}else{warning ( "YA EXISTE UN IMAGEPLANE" ); delete ($cam+"_WATERMARK__IMP");}
+	return $nodoImp;
+}
+
+global proc playblasteaGUI (){
+    global string $nombrePB;
+	global int $checkWire;
+
+    $nombrePB = "";
+    int $animIN = `playbackOptions -q -ast`;
+    int $animOUT = `playbackOptions -q -aet`;
+    global string $nameescena;
+    $nameescena = `file -q -sn -shn`;
+    $nameescena =  `substring $nameescena 1 (size($nameescena)-3)`;
+    global string $winPlay;
+    if ( `window -exists $winPlay` ) { deleteUI $winPlay;}
+    string $winPlay = `window  -tlc 970 55 -s 0  -t "PH_PLAYBLAST v2.7" ventana_001` ;
+    print (" PLAYBLAST v2.7");
+    string $Clayout1 = `columnLayout  -w 333 -p $winPlay `;
+    string $Rlayout2 = `rowLayout -p $Clayout1 -numberOfColumns 10`;
+    radioButtonGrp -columnAlign 1 "left" -columnAlign 2 "left" -numberOfRadioButtons 2 -cw 1 60 -vertical -label "In/Out de " -select 2 -labelArray2 "Secuencia" "Timeline" -p $Rlayout2 botonRadio1;
+    string $Clayout2 = `columnLayout  -w 80 -p $Rlayout2 `;
+    checkBox -label "Wireframe" -p $Clayout2 -changeCommand "chC_chB_wire()" checkWire1;
+	checkBox -label "AO" -p $Clayout2 -changeCommand "chC_chB_AO()" checkAO1 ;
+	string $Clayout3 = `rowLayout  -p $Rlayout2 -numberOfColumns 10`;
+    global string $inFrame="";    $inFrame= `intFieldGrp  -cw 1 33 -l "IN  =  "  -v1 $animIN  -p $Clayout3 inFrame`;
+    global string $outFrame="";   $outFrame= `intFieldGrp  -cw 1 44 -l "OUT  =  " -v1 $animOUT  -p $Clayout3 outFrame`;
+    text -l "Nombre: " -w 50  -p $Clayout3 ;
+    $nombrePB = `textField -w 150 -text ($nameescena +"_")  -p $Clayout3  `;
+    button  -l "PLAYBLAST !" -w 100 -backgroundColor (rand (1)) (rand (1)) (rand (1)) -enableBackground 0 -command "tirarPlayblast()"  -p $Clayout3 boton_001;
+    button  -l "Abrir Movies" -w 100  -p $Clayout3 -command  "abrirCarpetas()";
+    string $Rlayout3 = `rowLayout -cw1 1000 -h 20 -p $Clayout1 -numberOfColumns 1`;
+    text -w 800 -align "center"  -p $Rlayout3 -label "Doble click sobre un shot actualiza IN/OUT.    Control+ClickDer en la ventana de CameraSequencer asigna IN/OUT de secuencia completa.";
+    int $anchoVentanaPlayblast = `window -q -w $winPlay`;
+    int $altoVentanaPlayblast  = `window -q -h $winPlay`;
+    window -e -width $anchoVentanaPlayblast $winPlay;
+    window -e -height 70 $winPlay;
+    showWindow $winPlay;
+}
+
+global proc chC_chB_AO (){
+	int $checkAO = `checkBox -q -value checkAO1`;
+	string $currentPanel = `getPanel -withFocus`;
+	if ($checkAO==1){
+		print "AO ACTIVADO";
+		ActivateViewport20;
+		{
+		 string $panelType = `getPanel -to $currentPanel`;
+		 if ($panelType ==  "modelPanel")
+		 	{setRendererInModelPanel "vp2Renderer" $currentPanel;  }
+		else if ($panelType ==  "scriptedPanel") { 	string $cmd = "setRendererInModelPanel \"vp2Renderer\" ";scriptedPanelRunTimeCmd( $cmd, $currentPanel );}};
+		dR_setModelEditorTypes;
+		setAttr "hardwareRenderingGlobals.ssaoEnable" 1;
+		updateModelPanelBarV2Settings;
+		setAttr "hardwareRenderingGlobals.ssaoAmount" 1.5;
+		setAttr "hardwareRenderingGlobals.ssaoRadius" 9;
+		setAttr "hardwareRenderingGlobals.ssaoFilterRadius" 8;
+	}else{
+		print "AO ACTIVADO";
+		setRendererInModelPanel base_OpenGL_Renderer $currentPanel;
+		dR_setModelEditorTypes;
+		}
+}
+
+global proc chC_chB_wire (){
+	int $checkWire = `checkBox -q -value checkWire1`;
+	string $panel = `getPanel -wf`;
+	if ($checkWire==1){
+		if ( `modelEditor -ex $panel` )modelEditor -e -wos 1 $panel;
+	}else{
+		if ( `modelEditor -ex $panel` )modelEditor -e -wos 0 $panel;
+}}
+
+global proc tirarPlayblast() {
+	setSceneTimecodeVisibility(!`optionVar -q sceneTimecodeVisibility`);
+	setCurrentFrameVisibility(!`optionVar -q currentFrameVisibility`);
+	int $checkAO = `checkBox -q -value checkAO1`;
+    global string $nombrePB;
+    global string $nameescena;
+    global int $seleccionRadio1;
+    global int $checkWire;
+    global string $panel="";
+    int $checkWire=0;
+    button -e -bgc (rand (1)) (rand (1)) (rand (1)) boton_001;
+    int $inF = (`intFieldGrp -q -v1 inFrame`);
+    int $outF = (`intFieldGrp -q -v1 outFrame`);
+    $checkWire = `checkBox -q -value checkWire1`; print (`checkBox -q -value checkWire1`+"\n");
+
+    if ( $inF < $outF ) {
+		select -cl;
+		$QnombrePB = `textField -q -text $nombrePB `;
+		// IN OUT de secuencia o de timeline??
+		string $ruta = "";
+		$seleccionRadio1 = `radioButtonGrp -q -sl botonRadio1`;
+
+		if ($seleccionRadio1 == 2){ $seleccionRadio1 = 0;}
+		// modifico la RUTA dependiendo de si existe o no la ruta para poder meter el string en el flag
+		if ( `file -q -exists ("D:/")` ) {print "Prepara ruta en D";$ruta = "D:/";}
+		else {print "\nPrepara ruta en C";$ruta = "C:/";}
+		FechaDeEscena (true);
+
+
+		// asigno MARCA DE AGUA
+		string $waterMark;
+		$waterMark = "M:/PH_SCRIPTS/PH_RENDER/PH_MANAGERCAM/MARKWATER.png";
+		string $camaras[];
+		$camaras = `ls -type "camera"  "*_CAMSH" `;
+		for ($cam in $camaras){
+			if (`objExists ($cam+"_WATERMARK__IMP")`==1){delete ($cam+"_WATERMARK__IMP");}
+			createWaterMark($cam, $waterMark);
+		}
+
+		// playblast
+		playblast -fmt "qt" -startTime $inF  -endTime $outF -sequenceTime $seleccionRadio1 -fo -filename ($ruta + "movies/" + $QnombrePB + "_PREV.mov")
+		   -clearCache 1 -showOrnaments 1 -fp 1 -percent 100 -wh 1920 803 -offScreen -viewer 1 -useTraxSounds -compression "H.264" -quality 70;
+		FechaDeEscena (false);
+
+
+		//elimino MARCA DE AGUA
+		for ($cam in $camaras){	if (`objExists ($cam+"_WATERMARK__IMP")`==1){delete ($cam+"_WATERMARK__IMP");} }
+
+
+
+		$panel = `getPanel -wf`; //panel actual
+	if ($checkWire==1){modelEditor -e -wos 0 $panel;}
+	if ($checkAO==1){
+		setRendererInModelPanel base_OpenGL_Renderer $panel;
+		updateModelPanelBar $panel;
+		dR_setModelEditorTypes;
+	}
+	setSceneTimecodeVisibility(!`optionVar -q sceneTimecodeVisibility`);
+	setCurrentFrameVisibility(!`optionVar -q currentFrameVisibility`);
+
+        }else{
+            warning ("CHECKEAR IN Y OUT");}
+}
+
+global proc FechaDeEscena (int $onOFF){
+	if ($onOFF==true){
+	if (`headsUpDisplay -ex HUDFecha` == 1)    {headsUpDisplay -rem HUDFecha;}
+	if (`headsUpDisplay -ex HUDdatos` == 1)    {headsUpDisplay -rem HUDdatos;}
+	if (`headsUpDisplay -ex HUDoperador` == 1) {headsUpDisplay -rem HUDoperador;}
+	if (`headsUpDisplay -ex HUDFrame` == 1) {headsUpDisplay -rem HUDFrame;}
+	if (`headsUpDisplay -ex HUDCamara` == 1) {headsUpDisplay -rem HUDCamara;}
+
+	string $huds[];
+	$huds = `headsUpDisplay -listHeadsUpDisplays`;
+	for ($hud in $huds){headsUpDisplay -remove $hud;}
+
+	// creo displays
+	string $fecha = ( `date -format "DD/MM/YY   /    hh:mm"`);
+	string $ruta =   `file -q -sn`;
+	string $operador = `python "socket.gethostbyname(socket.gethostname())" `;
+
+	setCameraNamesVisibility(0);
+	setViewAxisVisibility(0);
+	setSelectDetailsVisibility(0);
+	setObjectDetailsVisibility(0);
+	setPolyCountVisibility(0);
+	setAnimationDetailsVisibility(0);
+	setHikDetailsVisibility(0);
+	setFrameRateVisibility(0);
+	setCurrentFrameVisibility(0);
+	setSceneTimecodeVisibility(0);
+	setCurrentContainerVisibility(0);
+	setViewportRendererVisibility(0);
+	setCameraNamesVisibility(1);
+	setFocalLengthVisibility(0);
+	setViewAxisVisibility(0);
+
+	headsUpDisplay -s 1 -b 3 -blockSize "small" -label ("Escena : " + $ruta)  -labelFontSize "large" HUDdatos;
+	headsUpDisplay -s 2 -b 3 -blockSize "small" -label ("FECHA / HORA : " + $fecha)  -labelFontSize "large"  HUDFecha;
+	headsUpDisplay -s 3 -b 3 -blockSize "small" -label ("Operador : " +$operador )  -labelFontSize "large"  HUDoperador;
+	headsUpDisplay -s 6 -b 1 -blockSize "small" -label ("Frame: " ) -attachToRefresh -command "currentTime -q" -ba "right" -labelFontSize "small"  HUDFrame;
+	headsUpDisplay -s 7 -b 1 -blockSize "small" -pre "sceneTimecode" -labelFontSize "large"   -ba "right" HUDTcode;
+	headsUpDisplay -s 8 -b 1 -blockSize "small" -pre "cameraNames" -labelFontSize "large"   -ba "right" HUDCamara;
+
+	}else{
+	// borro displays
+	headsUpDisplay -rem HUDFecha;
+	headsUpDisplay -rem HUDdatos;
+	headsUpDisplay -rem HUDoperador;
+	headsUpDisplay -rem HUDFrame;
+	headsUpDisplay -rem HUDTcode;
+	headsUpDisplay -rem HUDCamara;
+
+	}
+}
+
+global proc abrirCarpetas() {
+    system ("explorer/n," + "D:\\movies");
+}
+
+global proc refreshGUIplayblast(){
+    $animIN = `playbackOptions -q -ast`;
+    $animOUT = `playbackOptions -q -aet`;
+    intFieldGrp -e -v1 $animIN inFrame;
+    intFieldGrp -e -v1 $animOUT outFrame;
+    radioButtonGrp -e -select 2 botonRadio1;
+    button -e -bgc (rand (1)) (rand (1)) (rand (1)) boton_001;
+
+}
+
+global proc refreshGUIplayblastSecuenciaCompleta(){
+    string $listaShots [] = `ls -type shot`;
+    int $shotIN ;    int $secuenciaIN = `shot -q -sequenceStartTime $listaShots [0]`;
+    int $shotOUT;int $secuenciaOUT;
+    for ($cadaShot in $listaShots) {
+        $shotIN = `shot -q -sequenceStartTime $cadaShot`;
+        $shotOUT = `shot -q -sequenceEndTime $cadaShot`;
+        if ($shotIN < $secuenciaIN) {$secuenciaIN = $shotIN;}
+        if ($shotOUT > $secuenciaOUT) {$secuenciaOUT = $shotOUT;}
+    }
+    radioButtonGrp -e -select 1 botonRadio1;
+    intFieldGrp -e -v1 $secuenciaIN inFrame;
+    intFieldGrp -e -v1 $secuenciaOUT outFrame;
+    button -e -bgc (rand (1)) (rand (1)) (rand (1)) boton_001;
+}
+
+//////////////////////////////////////////////////////////////////////////
+scriptJob -e playbackRangeSliderChanged refreshGUIplayblast;
+playblasteaGUI();
+if (`objExists "sequencer1"`==1){
+	if( `popupMenu -exists cly_contextualTrash` ) {
+		deleteUI cly_contextualTrash;
+	}
+	popupMenu
+		-ctrlModifier 1
+		-button 3
+		-mm 1
+		-p sequenceEditorPanel1
+		-pmc (" refreshGUIplayblastSecuenciaCompleta()  ")
+	cly_contextualTrash;
+}else{print "PLAYBLAST ! v1.5: NO HAY SECUENCIA ARMADA";}

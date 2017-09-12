@@ -1,0 +1,28 @@
+INTERNAL NAMES:
+
+	(NAMEOBJECT)_(OTHERDESCRIPTION)__(TIPO DE NODO)*
+
+*Pueden no contener una o varias de esta informacion en el nombre.
+ Depende del area que se trabaje el archivo.
+
+
+	
+EJEMPLOS:
+
+
+RENDER LAYERS: (DESCRIBIR LO MEJOR EL RENDER LAYER)
+	
+	E035_P01_MASK__RLAY
+
+
+SHADER:*
+	
+	MESA_PATAS__SHD (nodo del shader rais)
+	MESA_PATAS_FILE_ (nodo de file)
+
+
+
+*dependiendo el nodo es el sufijo final
+
+IMPORTANTE SIEMPRE MIRAR LOS SUFIJOS DE LOS NODOS QUE ESTAN EN:
+M:\PH_SCRIPTS\SCRIPTS\suffNodes.py

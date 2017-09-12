@@ -1,0 +1,22 @@
+
+
+(NAMEOBJECT OR CHARACTER)_(DEPARTAMENT)_(CAMERAINFORMATION)_(OTHERDESCRIPTION)_(FRAMES)*
+* Pueden no contener una o varias de esta informacion en el nombre. Depende del area que se trabaje el archivo.
+
+EXTERNAL FILES WIP (ARCHIVOS INCLEMENTADOS CON BACKUP PARA TRABAJAR DIARIAMENTE):
+
+	TITO_MODEL_V001 - Archivo que se usa en departamente de modelado
+	TITO_RIG_V001 - Archivo que se usa en departamente de rigging
+	TITO_ANIMATION_V001 - Archivo que se usa en departamente de animacion
+	TITO_SHADER_V001 - Archivo que se usa para el departamento de shading
+	TITO_VFX_V001 - Archivo que se usa para el departamento de Efectos especiales
+	TITO_RENDER_V001 - Archivo que se usa para el departamento de renders
+
+ARCHIVOS FINALES ('ULTIMA' VERSION DEL ARCHIVO DE USO PARA SALIDA Y ENTRAR EN CUALQUIER OTRO DEPARTAMENTO ):
+
+	TITO_MODEL_FINAL - Archivo que contendran el modelo final con sus blendshape y uvs
+	TITO_RIG_FINAL - Archivo que tendra el rigging final y completo el cual se podra actualizar siempre
+	TITO_ANIMATION_FINAL - Archivo que referenciaran los animadores y podran animar todas las escenas
+	TITO_SHADER_FINAL - Archivo donde se seteo el shader y se usa para render final
+	TITO_VFX_FINAL - Archivo que se trabajaran los efectos sea para cache o para simulacion
+	TITO_RENDER_FINAL - Archivo que se usa para de la configuracion final el cual se hace conjuntamente con el departamento de compo 

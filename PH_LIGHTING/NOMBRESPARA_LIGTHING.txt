@@ -1,0 +1,14 @@
+(NAMEOBJECT/CHARACTER/NAMESCENE)_(CAMERAINFORMATION)_(OTRADESCRIPCION)_(TIPODERENDER)_(FRAMES)*
+* Pueden no contener una o varias de esta informacion en el nombre. Depende del area que se trabaje el archivo.
+
+EJEMPLO:
+
+Ejemplo de luz de ambiente:
+	C_MUSEO_CALIDA__LAMB transform de la luz
+		C_MUSEO_CALIDA__LAMBSH shape de la luz
+
+
+
+IMPORTANTE SIEMPRE MIRAR LOS SUFIJOS DE LOS NODOS YA QUE DEPENDE DE CADA TIPO DE NODO:
+se puede abrir con cualquier editor
+M:\PH_SCRIPTS\SCRIPTS\suffNodes.py

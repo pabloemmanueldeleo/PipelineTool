@@ -1,0 +1,43 @@
+string $confirmacion = `promptDialog -title "Ingresa" -message "IN" -button "OK" -cancelButton "Cancelar" -dismissString "Cancelar"`;
+string $sceneName = `file -q  -sn `;
+$prefijo = `substring $sceneName (size($sceneName)-16) (size($sceneName)-8)  `;
+
+int $inF;
+if ($confirmacion == "OK" ) { 
+    $inF = int (`promptDialog -q -text`);
+}
+
+string $confirmacion = `promptDialog -title "Ingresa" -message "OUT" -button "OK" -cancelButton "Cancelar" -dismissString "Cancelar"`;
+
+int $outF;
+if ($confirmacion == "OK" ) { 
+    $outF = int (`promptDialog -q -text`);
+}
+
+string $confirmacion = `promptDialog -title "Ingresa" -message ("Nombre de playblast= " + $prefijo + "_")-button "OK" -cancelButton "Cancelar" -dismissString "Cancelar"`;
+
+
+string $nombrePB;
+if ($confirmacion == "OK" ) { 
+    $nombrePB = `promptDialog -q -text`;
+}
+
+
+
+
+global proc string datosDeEscena (){
+    string $nombre =   `file -q -sn`;
+    $nombre += ("      Fecha: " + `date -d`);
+    
+    return $nombre;   
+}
+
+headsUpDisplay -s 1 -b 0 -blockSize "medium" -label "Escena" -labelFontSize "large" 
+               -command "datosDeEscena()" 
+               -nodeChanges "attributeChange" HUDObjectPosition;
+
+select -cl;
+
+playblast -fmt "qt" -startTime $inF  -endTime $outF -sequenceTime 1 -forceOverwrite -filename ("movies/"+ $prefijo + "_" + $nombrePB +"_PREV.mov") -clearCache 1 -showOrnaments 1 -fp 1 -percent 100 -wh 1920 803 -offScreen -viewer 1 -useTraxSounds -compression "H.264" -quality 70;
+
+headsUpDisplay -rem HUDObjectPosition;
